@@ -1,0 +1,48 @@
+﻿@model SalesTaxesWebApp.Models.Purchase.ShoppingCartItemDto
+
+@{
+    var lineCount = Model.Id;
+    var isImportedChecked = Model.IsImported ? "checked" : "";
+    var isTaxExemptedChecked = Model.IsTaxExempted ? "checked" : "";
+}
+
+<tr class="line-item">
+    <td class="col-sm-2">
+        @Html.TextBox("Items[" + lineCount + "].ItemName", Model.ItemName, new { @class = "form-control itemName input-sm" })
+    </td>
+    <td class="col-sm-2">
+        @Html.TextBox("Items[" + lineCount + "].ListPrice", Model.ListPrice, new { @class = "form-control listPrice input-sm" })
+    </td>
+    <td class="col-sm-2">
+        @Html.TextBox("Items[" + lineCount + "].Quantity", Model.Quantity, new { @class = "form-control quantity input-sm" })
+    </td>
+    <td class="col-sm-2">
+        <div class="expected-response">
+            @if (Model.IsImported)
+            {
+                @Html.TextBox("Items[" + lineCount + "].IsImported", Model.IsImported, new { @class = "expected-response-switch isImported", @type = "checkbox", @checked = "checked" })
+            }
+            @if (!Model.IsImported)
+            {
+                @Html.TextBox("Items[" + lineCount + "].IsImported", Model.IsImported, new { @class = "expected-response-switch isImported", @type = "checkbox"})
+            }
+        </div>
+        @Html.Hidden("Items[" + lineCount + "].IsImported", Model.IsImported)
+    </td>
+    <td>
+        <div class="expected-response">
+            @if (Model.IsTaxExempted)
+            {
+                @Html.TextBox("Items[" + lineCount + "].IsTaxExempted", Model.IsTaxExempted, new { @class = "expected-response-switch isTaxExempted", @type = "checkbox", @checked = "checked" })
+            }
+            @if (!Model.IsTaxExempted)
+            {
+                @Html.TextBox("Items[" + lineCount + "].IsTaxExempted", Model.IsTaxExempted, new { @class = "expected-response-switch isTaxExempted", @type = "checkbox" })
+            }           
+        </div>
+        @Html.Hidden("Items[" + lineCount + "].IsTaxExempted", Model.IsTaxExempted)
+    </td>
+    <td class="col-sm-1 text-right">
+        <button title="Remove Item" class="btn btn-sm btnItem-Remove" id="btnItemRemove_@lineCount"><span class="glyphicon glyphicon-remove"></span></button>
+    </td>
+</tr>

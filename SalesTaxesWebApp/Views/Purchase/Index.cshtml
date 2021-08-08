@@ -1,0 +1,180 @@
+﻿@model SalesTaxesWebApp.Models.Purchase.PurchaseViewModel
+
+@{
+    ViewBag.Title = "Purchase";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var isValidItem = Model.Items != null && Model.Items.Count > 0;
+    var formUrl = Url.Action("Index", "Purchase");
+}
+
+@Styles.Render("~/Content/bootstrap-switch")
+
+<form method="POST" action="@formUrl" id="formPurchaseInfo">
+    @Html.HiddenFor(x => x.DoClearModel)
+    <div class="panel panel-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1>Purchase</h1>
+            </div>
+        </div>
+        <div id="cartSection">
+            <h4 class="panel-heading">Shopping Cart</h4>
+            <div id="divItemInfo">
+                <div class="col-lg-12">
+                    <table class="table table-striped" id="tblAddItems">
+                        <thead>
+                            <tr>
+                                <th class="col-sm-2">Item Name<span class="text-danger">*</span></th>
+                                <th class="col-sm-2">List Price<span class="text-danger">*</span></th>
+                                <th class="col-sm-2">Quantity <span class="text-danger">*</span></th>
+                                <th class="col-sm-2">Is Imported <span class="text-danger">*</span></th>
+                                <th class="col-sm-3">Is Tax Exempted (books, food, medical products) <span class="text-danger">*</span></th>
+                                <th class="col-sm-1"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="new-line ">
+                                <td>
+                                    <input type="text" class="form-control newItemName input-sm" name="newItemName" id="newItemName" value="Please enter name" required />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control newListPrice input-sm" name="newListPrice" id="newListPrice" value="0.0001" required />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control newQuantity input-sm" name="newQuantity" id="newQuantity" value="1" required />
+                                </td>
+                                <td>
+                                    <div class="expected-response">
+                                        <input type="checkbox" class="new-expected-response-switch" id="isImportedNewSwitch" name="isImportedNewSwitch">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="expected-response">
+                                        <input type="checkbox" class="new-expected-response-switch" id="isTaxExemptedNewSwitch" name="isTaxExemptedNewSwitch">
+                                    </div>
+                                </td>
+                                <td class="text-right">
+                                    <button type="button" id="btnAddItem" title="Add Item" class="btn btn-sm btn-success" data-loading-text="Updating"><span class="glyphicon glyphicon-plus icon-white"></span></button>
+                                </td>
+                            </tr>
+                            @if (isValidItem)
+                            {
+                                var i = 0;
+                                foreach (var item in Model.Items)
+                                {
+                                    item.Id = i;
+                                    @Html.Partial("_ShoppingCartItem", item);
+                                    i++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @if (!isValidItem)
+        {
+            <div>
+                <div class="row panel-heading">
+                    <div id="placeOrderButtonWrapper" class="col-sm-3 pull-right text-right margin-top-20">
+                        <button class="rpi-fixed-wide btn-primary btn btn-short disabled" type="submit" value=" Create" id="btnPlaceOrder" data-loading-text="Updating">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div id="loadingIcon" style="display: none;">
+            <img src="@Url.Content("~/Content/images/Loading.gif")" class="center-block" />
+        </div>
+
+        @if (isValidItem)
+        {
+            <div class="receiptSummary">
+                <h4 class="panel-heading">Receipt</h4>
+                <div id="divReceiptInfo">
+                    <div class="col-lg-12">
+                        <table class="table table-striped" id="tblReceipt">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-2">Description</th>
+                                    <th class="col-sm-2">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    var description = "";
+                                    var salesPriceString = "";
+                                    if (item.IsImported)
+                                    {
+                                        description = "Imported " + item.ItemName;
+                                    }
+                                    else
+                                    {
+                                        description = item.ItemName;
+                                    }
+                                    if (item.Quantity > 1)
+                                    {
+                                        salesPriceString = item.Quantity * item.SalesPrice + " (" + item.Quantity + " @ " + item.SalesPrice + ")";
+                                    }
+                                    else
+                                    {
+                                        salesPriceString = item.SalesPrice.ToString();
+                                    }
+
+                                    <tr>
+                                        <td>@description</td>
+                                        <td>@salesPriceString</td>
+                                    </tr>
+                                }
+                                @if (Model.TotalTaxes > 0)
+                                {
+                                    <tr>
+                                        <td>Total Sales Taxes</td>
+                                        <td>@Model.TotalTaxes</td>
+                                    </tr>
+                                }
+                                @if (Model.TotalCost > 0)
+                                {
+                                    <tr>
+                                        <td>Total</td>
+                                        <td>@Model.TotalCost</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="row panel-heading">
+                    <div class="col-sm-3 pull-right text-right margin-top-20">
+                        <button class="rpi-fixed-wide btn-default btn btn-short" type="submit" value="Clear" id="btnClearOrder">
+                            Clear Orders
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</form>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/purchasejs");
+    <script>
+        $(function () {
+            var endpoints = {
+                addItem: '@Url.Content("~/Purchase/AddItem")'
+            }
+            var isformPosted = @Json.Encode(isValidItem);
+            var deleteMessage = "Are you sure you wish to delete this item?";
+            var addItemMessage = "Please add an item before placing the order";
+            var viewModel = new purchaseViewModel(endpoints, deleteMessage, isformPosted, true, addItemMessage);
+            viewModel.init();
+        });
+    </script>
+}
+
